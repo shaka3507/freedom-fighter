@@ -1,33 +1,59 @@
-// src/scenes/IntroScene.ts
 import * as Phaser from 'phaser';
 
 export class IntroScene extends Phaser.Scene {
+  private music!: Phaser.Sound.BaseSound;
+
   constructor() {
     super('IntroScene');
+  }
+
+  preload() {
+    this.load.image('backgroundIntro', 'src/assets/background/intro_scene_background.png');
+    this.load.audio('introMusic', 'src/assets/audio/forest-sound.mp3');
   }
 
   create() {
     const { width, height } = this.scale;
 
-    const title = this.add.text(width / 2, height / 2, '1863: Harriet Tubman and the Combahee River Raid', {
-      fontSize: '18px',
-      color: '#ffffff'
+    this.add.image(0, 0, 'backgroundIntro')
+      .setOrigin(0, 0)
+      .setDisplaySize(width, height);
+
+    this.music = this.sound.add('introMusic', {
+      volume: 0.5,
+      loop: true,
     });
-    title.setOrigin(0.5);
 
-    // Fade in from black
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
+    // Blinking prompt
+    const clickText = this.add.text(width / 2, height / 2, 'Click to begin', {
+      fontSize: '36px',
+      color: '#ffffff',
+      backgroundColor: 'black'
+    }).setOrigin(0.5, -1);
 
-    // Wait a bit, then fade out and go to menu
-    this.time.delayedCall(2000, () => {
-      this.cameras.main.fadeOut(1000, 0, 0, 0);
+    this.tweens.add({
+      targets: clickText,
+      alpha: 0,
+      duration: 800,
+      yoyo: true,
+      repeat: -1,
+    });
 
-      this.cameras.main.once(
-        Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
-        () => {
-          this.scene.start('MenuScene');
-        }
-      );
+    this.input.once('pointerdown', () => {
+      clickText.destroy();
+
+      this.music.play();
+
+      this.cameras.main.fadeIn(1000, 0, 0, 0);
+
+      this.time.delayedCall(5000, () => {
+        this.cameras.main.fadeOut(1000, 0, 0, 0);
+
+        this.cameras.main.once(
+          Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+          () => this.scene.start('MenuScene')
+        );
+      });
     });
   }
 }

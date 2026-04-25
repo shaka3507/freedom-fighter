@@ -14,7 +14,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "phaser": "^4.0.0"
+    "phaser": "^4.0.0",
+    "webfontloader": "^1.6.28"
   },
   "devDependencies": {
     "typescript": "^6.0.3",
