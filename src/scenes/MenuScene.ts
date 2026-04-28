@@ -19,7 +19,7 @@ export class MenuScene extends Phaser.Scene {
       active: () => { 
         this.add.text(width / 2, height * 0.2, 'Main Menu', {
           fontFamily: FONT_FAMILY,
-          fontSize: '32px',
+          fontSize: '48px',
           color: '#ffffff',
         }).setOrigin(0.5);
 
@@ -37,15 +37,15 @@ export class MenuScene extends Phaser.Scene {
         options.forEach((opt, index) => {
           const text = this.add
             .text(width / 2, startY + index * gap, opt.label, {
-              fontSize: '28px',
+              fontSize: '48px',
               color: '#fff',
               fontFamily: FONT_FAMILY,
             })
             .setOrigin(0.5)
             .setInteractive({ useHandCursor: true });
 
-          text.on('pointerover', () => text.setStyle({ color: 'yellow', fontFamily: FONT_FAMILY }));
-          text.on('pointerout', () => text.setStyle({ color: '#fff', fontFamily: FONT_FAMILY }));
+          text.on('pointerover', () => text.setStyle({ color: 'yellow', fontSize: '52px', fontFamily: FONT_FAMILY }));
+          text.on('pointerout', () => text.setStyle({ color: '#fff', fontSize: '48px', fontFamily: FONT_FAMILY }));
 
           text.on('pointerup', () => {
             this.handleMenuClick(opt.scene);

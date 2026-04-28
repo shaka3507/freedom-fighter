@@ -46,8 +46,8 @@ export class IntroScene extends Phaser.Scene {
 
       this.cameras.main.fadeIn(1000, 0, 0, 0);
 
-      this.time.delayedCall(5000, () => {
-        this.cameras.main.fadeOut(1000, 0, 0, 0);
+      this.time.delayedCall(500, () => {
+        this.cameras.main.fadeOut(500, 0, 0, 0);
 
         this.cameras.main.once(
           Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,

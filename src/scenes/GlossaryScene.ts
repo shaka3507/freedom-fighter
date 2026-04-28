@@ -17,14 +17,23 @@ export class GlossaryScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    this.add.text(50, 140, 'Here is where your glossary content will go.', {
-      fontSize: '20px',
-      color: '#ffffff',
-      wordWrap: { width: width - 100 }
-    });
-
     this.addBackButton();
+    this.addGlossaryText(width, height);
   }
+
+  private addGlossaryText(width: number, height: number) {
+    const definition1 = "Combahee River (/kəmˈbiː/ kəm-BEE)\nA short blackwater river in the southern Lowcountry region of South Carolina formed at the confluence of the Salkehatchie and Little Salkehatchie rivers near the Islandton community of Colleton County, South Carolina. It takes its name from the Combahee tribe, a Muskogean-speaking Native American group of the Cusabo group, who originally inhabited the area."
+
+    this.add.text(width / 2, height / 2, definition1, {
+      fontSize: '36px',
+      color: '#000',
+      backgroundColor: '#fff',
+      padding: { x: 20, y: 20 },
+      wordWrap: { width: width * 0.5 },
+      align: 'left',
+    }).setOrigin(0.5, 0.5);
+  }
+  
 
   private addBackButton() {
     const back = this.add
