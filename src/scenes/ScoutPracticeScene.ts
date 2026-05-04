@@ -47,7 +47,7 @@ export class ScoutPracticeScene extends Phaser.Scene {
   preload() {
     // Fallback images (optional)
     if (!this.textures.exists('fallbackBackground')) {
-      this.load.image('fallbackBackground', 'src/assets/art/river_night_bg.png');
+      this.load.image('fallbackBackground', 'src/assets/background/river_night_bg.png');
     }
 
     if (!this.textures.exists('fallbackTrap')) {
@@ -58,7 +58,10 @@ export class ScoutPracticeScene extends Phaser.Scene {
     }
 
     // REAL background image (make sure this path is correct)
-    this.load.image('river_night_bg', 'src/assets/art/river_night_bg.png');
+    this.load.image('river_night_bg', 'src/assets/background/river_night_bg.png');
+
+    // traps
+    this.load.image('torpedo_barrel_01', 'src/assets/art/torpedo_barrel_01.png');
 
     // AUDIO – just load; do not add/play here
     this.load.audio('boatWaterLoop', 'src/assets/audio/rowboat.mp3');
@@ -71,8 +74,8 @@ export class ScoutPracticeScene extends Phaser.Scene {
     intro?.stop();
 
     this.configData = {
-      backgroundKey: data.backgroundKey || 'fallbackBackground',
-      trapKeys: data.trapKeys?.length ? data.trapKeys : ['fallbackTrap'],
+      backgroundKey: 'fallbackBackground',
+      trapKeys: ['torpedo_barrel_01'],
       notebookKey: data.notebookKey || 'fallbackNotebook',
       numTraps: data.numTraps ?? 100
     };
@@ -89,6 +92,7 @@ export class ScoutPracticeScene extends Phaser.Scene {
       .image(width / 2, height / 2, this.configData.backgroundKey)
       .setScrollFactor(0);
 
+
     // Scale it like CSS "background-size: cover"
     const bgWidth = this.riverBg.width;
     const bgHeight = this.riverBg.height;
@@ -104,24 +108,6 @@ export class ScoutPracticeScene extends Phaser.Scene {
       targets: this.riverBg,
       y: this.riverBg.y + 10,  // move down a bit
       duration: 6000,          // 6 seconds
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.inOut'
-    });
-
-    // -----------------------------------------------------------------------
-    // Bottom boat edge / UI (as if you see edge of boat at bottom)
-    // -----------------------------------------------------------------------
-    const boat = this.add
-      .sprite(width / 2, height, this.configData.boatKey)
-      .setOrigin(0.5, 1) // bottom center
-      .setScrollFactor(0);
-
-    // little bobbing motion for boat
-    this.tweens.add({
-      targets: boat,
-      y: height - 10,
-      duration: 1500,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.inOut'
@@ -188,45 +174,45 @@ export class ScoutPracticeScene extends Phaser.Scene {
   //  POV-style trap spawning: from “horizon” downward, scaling up
   // -------------------------------------------------------------------------
 
-  private spawnTrap() {
-    const { width, height } = this.scale;
+private spawnTrap() {
+  const { width, height } = this.scale;
 
-    const x = Phaser.Math.Between(width * 0.2, width * 0.8);
-    const yStart = height * 0.2;
-    const yEnd = height * 0.9;
+  const x = Phaser.Math.Between(width * 0.2, width * 0.8);
+  const yStart = height * 0.4;
+  const yEnd = height * 0.9;
 
-    const textureKey = Phaser.Utils.Array.GetRandom(this.configData.trapKeys);
-    const sprite = this.add.sprite(x, yStart, textureKey).setInteractive({
-      useHandCursor: true
-    });
+  const textureKey = Phaser.Utils.Array.GetRandom(this.configData.trapKeys);
+  const sprite = this.add.sprite(x, yStart, textureKey).setInteractive({
+    useHandCursor: true
+  });
 
-    const startScale = 0.9;
-    const endScale = 1.4;
-    sprite.setScale(startScale);
+  // Smaller at start and end
+  const startScale = 0.25;
+  const endScale = 0.4;
+  sprite.setScale(startScale);
 
-    const isExplosive = Math.random() < 0.7;
-    const trapData: TrapData = {
-      type: isExplosive ? 'explosive' : 'trap',
-      points: isExplosive ? 10 : 5
-    };
-    sprite.setData('trapData', trapData);
+  const isExplosive = Math.random() < 0.7;
+  const trapData: TrapData = {
+    type: isExplosive ? 'explosive' : 'trap',
+    points: isExplosive ? 10 : 5
+  };
+  sprite.setData('trapData', trapData);
 
-    sprite.on('pointerup', () => this.onTrapClicked(sprite));
+  sprite.on('pointerup', () => this.onTrapClicked(sprite));
+  this.trapGroup.add(sprite);
 
-    this.trapGroup.add(sprite);
+  const travelDuration = Phaser.Math.Between(4500, 5500);
 
-    const travelDuration = Phaser.Math.Between(4500, 5500);
-
-    this.tweens.add({
-      targets: sprite,
-      y: yEnd,
-      scale: endScale,
-      duration: travelDuration,
-      ease: 'Linear',
-      onComplete: () => {
-        if (sprite.active) sprite.destroy();
-      }
-    });
+  this.tweens.add({
+    targets: sprite,
+    y: yEnd,
+    scale: endScale,
+    duration: travelDuration,
+    ease: 'Linear',
+    onComplete: () => {
+      if (sprite.active) sprite.destroy();
+    }
+  });
   }
 
   private onTrapClicked(sprite: Phaser.GameObjects.Sprite) {
