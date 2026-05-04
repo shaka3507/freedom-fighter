@@ -23,8 +23,8 @@ export class HelpScene extends Phaser.Scene {
   }
 
   private addBackstoryText(width: number, height: number) {
-    const EXPLAINER_TEXT = "Welcome to late May 1863. You're a scout for the Federal Army (Union), and was born into slavery. You have the honor of working with 'Moses', a.k.a. Harriet Tubman. The mission is dangerous - you and other freed men are going to complete a raid on several plantations in the Carolinas low country. Not only will this be an extreme blow to the Confederates, hundreds of Freedom Seekers will finally be free. You're mission is to scout out traps set by the confederate, and collect momentos to bring back to New York. Enter camp or scout practice to help complete your mission.";
-    const DIRECTIONS_TEXT = "1) Visit camp to collect mementos and artifacts to bring back home to Weeksville, New York. \n\n2) Practice scouting by identifying traps and explosives hidden by the Confederate Army."
+    const EXPLAINER_TEXT = "Welcome to late May 1863. You're a scout for the Federal Army (Union), and was born into slavery. You have the honor of working with 'Moses', a.k.a. Harriet Tubman. The mission is dangerous - you and other freed men are going to raid several plantations in the Carolinas low country. Not only will this be an extreme blow to the Confederates, hundreds of Freedom Seekers will finally be free. Your mission is to find traps set by the Confederate army, and collect momentos to bring back home. Enter camp or scout practice to help complete your mission.";
+    const DIRECTIONS_TEXT = "1) Visit camp to collect mementos and artifacts to bring back home. \n\n2) Practice scouting by identifying traps and explosives hidden by the Confederate Army."
     this.add.text(width / 2, height / 2, EXPLAINER_TEXT, {
       fontSize: '24px',
       color: '#ffffff',
