@@ -40,6 +40,21 @@ export class ScoutPracticeScene extends Phaser.Scene {
   private isMotionEnabled = true;
   private isSoundEnabled = true;
 
+  // practice over
+  private practiceOverlay?: Phaser.GameObjects.Rectangle;
+  private practicePanel?: Phaser.GameObjects.Rectangle;
+  private practiceText?: Phaser.GameObjects.Text;
+  private practiceMoreBtn?: Phaser.GameObjects.Text;
+  private practiceCampBtn?: Phaser.GameObjects.Text;
+  private isPracticeDialogOpen = false;
+
+  private didYouKnowFacts: string[] = [
+  // fill with your facts, e.g.:
+  'Harriet Tubman served as a scout and spy for the Union Army during the Civil War.',
+  'On June 2, 1863, Harriet Tubman helped lead the Combahee River Raid, freeing more than 700 enslaved people.',
+  // ...
+]
+
   constructor() {
     super('ScoutPracticeScene');
   }
@@ -50,18 +65,15 @@ export class ScoutPracticeScene extends Phaser.Scene {
       this.load.image('fallbackBackground', 'src/assets/background/river_night_bg.png');
     }
 
-    if (!this.textures.exists('fallbackTrap')) {
-      this.load.image('fallbackTrap', 'src/assets/fallback/trap.png');
-    }
-    if (!this.textures.exists('fallbackNotebook')) {
-      this.load.image('fallbackNotebook', 'src/assets/fallback/notebook.png');
-    }
-
     // REAL background image (make sure this path is correct)
     this.load.image('river_night_bg', 'src/assets/background/river_night_bg.png');
 
     // traps
     this.load.image('torpedo_barrel_01', 'src/assets/art/torpedo_barrel_01.png');
+    this.load.image('torpedo_logframe_01', 'src/assets/art/torpedo_log_barrel_01.png');
+
+    // notebook
+    this.load.image('notebookOpen', 'src/assets/art/notebook_open.png');
 
     // AUDIO – just load; do not add/play here
     this.load.audio('boatWaterLoop', 'src/assets/audio/rowboat.mp3');
@@ -75,8 +87,8 @@ export class ScoutPracticeScene extends Phaser.Scene {
 
     this.configData = {
       backgroundKey: 'fallbackBackground',
-      trapKeys: ['torpedo_barrel_01'],
-      notebookKey: data.notebookKey || 'fallbackNotebook',
+      trapKeys: ['torpedo_barrel_01', 'torpedo_logframe_01'],
+      notebookKey: 'notebookOpen',
       numTraps: data.numTraps ?? 100
     };
     this.maxTraps = this.configData.numTraps!;
@@ -137,7 +149,13 @@ export class ScoutPracticeScene extends Phaser.Scene {
       delay: 900,        // ms between spawns
       loop: true,
       callback: () => {
-        if (this.trapsSpawned >= this.maxTraps) return;
+        if (this.trapsSpawned >= this.maxTraps) {
+          // When we hit the limit, show practice complete dialog once
+          if (!this.isPracticeDialogOpen) {
+            this.openPracticeDialog();
+          }
+          return;
+        }
         this.spawnTrap();
         this.trapsSpawned++;
       }
@@ -158,7 +176,7 @@ export class ScoutPracticeScene extends Phaser.Scene {
       50,
       80,
       'Identify and click on the Confederate torpedos and traps as you pass them in your boat. This info is vital for the mission.\n' +
-        'They appear ahead, move closer, then pass by.',
+      'They appear ahead, move closer, then pass by.',
       {
         fontSize: '18px',
         color: '#ffffff',
@@ -174,45 +192,45 @@ export class ScoutPracticeScene extends Phaser.Scene {
   //  POV-style trap spawning: from “horizon” downward, scaling up
   // -------------------------------------------------------------------------
 
-private spawnTrap() {
-  const { width, height } = this.scale;
+  private spawnTrap() {
+    const { width, height } = this.scale;
 
-  const x = Phaser.Math.Between(width * 0.2, width * 0.8);
-  const yStart = height * 0.4;
-  const yEnd = height * 0.9;
+    const x = Phaser.Math.Between(width * 0.2, width * 0.8);
+    const yStart = height * 0.4;
+    const yEnd = height * 0.9;
 
-  const textureKey = Phaser.Utils.Array.GetRandom(this.configData.trapKeys);
-  const sprite = this.add.sprite(x, yStart, textureKey).setInteractive({
-    useHandCursor: true
-  });
+    const textureKey = Phaser.Utils.Array.GetRandom(this.configData.trapKeys);
+    const sprite = this.add.sprite(x, yStart, textureKey).setInteractive({
+      useHandCursor: true
+    });
 
-  // Smaller at start and end
-  const startScale = 0.25;
-  const endScale = 0.4;
-  sprite.setScale(startScale);
+    // Smaller at start and end
+    const startScale = 0.25;
+    const endScale = 0.4;
+    sprite.setScale(startScale);
 
-  const isExplosive = Math.random() < 0.7;
-  const trapData: TrapData = {
-    type: isExplosive ? 'explosive' : 'trap',
-    points: isExplosive ? 10 : 5
-  };
-  sprite.setData('trapData', trapData);
+    const isExplosive = Math.random() < 0.7;
+    const trapData: TrapData = {
+      type: isExplosive ? 'explosive' : 'trap',
+      points: isExplosive ? 10 : 5
+    };
+    sprite.setData('trapData', trapData);
 
-  sprite.on('pointerup', () => this.onTrapClicked(sprite));
-  this.trapGroup.add(sprite);
+    sprite.on('pointerup', () => this.onTrapClicked(sprite));
+    this.trapGroup.add(sprite);
 
-  const travelDuration = Phaser.Math.Between(4500, 5500);
+    const travelDuration = Phaser.Math.Between(4500, 5500);
 
-  this.tweens.add({
-    targets: sprite,
-    y: yEnd,
-    scale: endScale,
-    duration: travelDuration,
-    ease: 'Linear',
-    onComplete: () => {
-      if (sprite.active) sprite.destroy();
-    }
-  });
+    this.tweens.add({
+      targets: sprite,
+      y: yEnd,
+      scale: endScale,
+      duration: travelDuration,
+      ease: 'Linear',
+      onComplete: () => {
+        if (sprite.active) sprite.destroy();
+      }
+    });
   }
 
   private onTrapClicked(sprite: Phaser.GameObjects.Sprite) {
@@ -242,24 +260,156 @@ private spawnTrap() {
   private createScoreUI() {
     this.score = 0;
 
+    const { width, height } = this.scale;
+
+    // Place the open notebook near bottom-left
     this.notebookIcon = this.add
-      .sprite(20, this.scale.height - 20, this.configData.notebookKey)
-      .setOrigin(0, 1)
-      .setScale(0.7)
+      .sprite(40, height - 40, this.configData.notebookKey)
+      .setOrigin(0, 1)      // bottom-left of the sprite
+      .setScale(0.6)        // tweak 0.5–0.8 to taste
       .setScrollFactor(0);
+
+    const nb = this.notebookIcon;
+
+    // Position text over the right-hand page
+    // These offsets are tuned to the generated art's layout:
+    const textOffsetX = nb.displayWidth * 0.55;   // move to right page
+    const textOffsetY = -nb.displayHeight * 0.55; // up into page area
+
+    const textX = nb.x + textOffsetX;
+    const textY = nb.y + textOffsetY;
 
     this.scoreText = this.add
       .text(
-        this.notebookIcon.x + this.notebookIcon.displayWidth + 10,
-        this.notebookIcon.y - this.notebookIcon.displayHeight / 2,
+        textX,
+        textY,
         'x 0\n[0.000, 0.000]',
         {
-          fontSize: '18px',
-          color: '#ffffff'
+          fontSize: '20px',
+          color: '#2b2418',   // ink-like dark brown
         }
       )
-      .setOrigin(0, 0.5)
+      .setOrigin(0, 0)       // top-left of the text block
       .setScrollFactor(0);
+  }
+
+  private openPracticeDialog() {
+    this.isPracticeDialogOpen = true;
+
+    const { width, height } = this.scale;
+
+    // Dark overlay
+    this.practiceOverlay = this.add.rectangle(
+      width / 2,
+      height / 2,
+      width,
+      height,
+      0x000000,
+      0.6
+    ).setScrollFactor(0);
+    this.practiceOverlay.setDepth(900);
+
+    // Panel
+    const panelWidth = 680;
+    const panelHeight = 260;
+
+    this.practicePanel = this.add.rectangle(
+      width / 2,
+      height / 2,
+      panelWidth,
+      panelHeight,
+      0x222222,
+      0.95
+    ).setStrokeStyle(4, 0xffffff);
+    this.practicePanel.setDepth(901).setScrollFactor(0);
+
+    // Text
+    const message =
+      'You have finished this round of scouting practice.\n\n' +
+      'Would you like to keep practicing, or return to camp?';
+
+    this.practiceText = this.add.text(
+      width / 2,
+      height / 2 - 50,
+      message,
+      {
+        fontSize: '24px',
+        color: '#ffffff',
+        align: 'center',
+        wordWrap: { width: panelWidth - 40 }
+      }
+    ).setOrigin(0.5).setDepth(902).setScrollFactor(0);
+
+    // Practice more button
+    this.practiceMoreBtn = this.add.text(
+      width / 2 - 140,
+      height / 2 + 50,
+      'Practice More',
+      {
+        fontSize: '22px',
+        color: '#66ff66',
+        backgroundColor: '#000000'
+      }
+    )
+      .setPadding(12, 8, 12, 8)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(902)
+      .setScrollFactor(0);
+
+    this.practiceMoreBtn.on('pointerup', () => {
+      this.closePracticeDialog();
+      this.resetPractice();
+    });
+
+    // Back to Camp button
+    this.practiceCampBtn = this.add.text(
+      width / 2 + 140,
+      height / 2 + 50,
+      'Back to Camp',
+      {
+        fontSize: '22px',
+        color: '#ffcc66',
+        backgroundColor: '#000000'
+      }
+    )
+      .setPadding(12, 8, 12, 8)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(902)
+      .setScrollFactor(0);
+
+    this.practiceCampBtn.on('pointerup', () => {
+      this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.cameras.main.once(
+        Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+        () => this.scene.start('CampScene')
+      );
+    });
+  }
+
+  private closePracticeDialog() {
+    this.isPracticeDialogOpen = false;
+
+    this.practiceOverlay?.destroy();
+    this.practicePanel?.destroy();
+    this.practiceText?.destroy();
+    this.practiceMoreBtn?.off('pointerup');
+    this.practiceCampBtn?.off('pointerup');
+    this.practiceMoreBtn?.destroy();
+    this.practiceCampBtn?.destroy();
+  }
+
+  // Reset practice so player can continue
+  private resetPractice() {
+    // Clear existing traps
+    this.trapGroup.clear(true, true); // remove and destroy all children
+
+    // Reset counters and score if you want a fresh run
+    this.trapsSpawned = 0;
+    this.maxTraps = this.configData.numTraps ?? 100;
+    this.score = 0;
+    this.scoreText.setText('x 0\n[0.000, 0.000]');
   }
 
   private addScore(points: number, worldX: number, worldY: number) {
