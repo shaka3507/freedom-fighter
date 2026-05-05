@@ -6,7 +6,6 @@ type TrapType = 'explosive' | 'trap';
 export interface ScoutPracticeSceneConfig {
   backgroundKey: string;   // river at night
   trapKeys: string[];      // list of sprite keys to randomly use for traps/explosives
-  notebookKey: string;     // sprite for the score icon
   numTraps?: number;       // optional, we’ll also use time-based spawning
 }
 
@@ -18,7 +17,6 @@ interface TrapData {
 export class ScoutPracticeScene extends Phaser.Scene {
   private score = 0;
   private scoreText!: Phaser.GameObjects.Text;
-  private notebookIcon!: Phaser.GameObjects.Sprite;
   private configData!: ScoutPracticeSceneConfig;
 
   private riverBg!: Phaser.GameObjects.Image;
@@ -35,7 +33,7 @@ export class ScoutPracticeScene extends Phaser.Scene {
 
   private boatLoopSound?: Phaser.Sound.BaseSound;
 
-  // NEW: background motion tween + flags
+  // background motion tween + flags
   private riverMotionTween?: Phaser.Tweens.Tween;
   private isMotionEnabled = true;
   private isSoundEnabled = true;
@@ -49,31 +47,27 @@ export class ScoutPracticeScene extends Phaser.Scene {
   private isPracticeDialogOpen = false;
 
   private didYouKnowFacts: string[] = [
-  // fill with your facts, e.g.:
-  'Harriet Tubman served as a scout and spy for the Union Army during the Civil War.',
-  'On June 2, 1863, Harriet Tubman helped lead the Combahee River Raid, freeing more than 700 enslaved people.',
-  // ...
-]
+    'Harriet Tubman served as a scout and spy for the Union Army during the Civil War.',
+    'On June 2, 1863, Harriet Tubman helped lead the Combahee River Raid, freeing more than 700 enslaved people.'
+    // add more as needed…
+  ];
 
   constructor() {
     super('ScoutPracticeScene');
   }
 
   preload() {
-    // Fallback images (optional)
+    // Fallback background (optional)
     if (!this.textures.exists('fallbackBackground')) {
       this.load.image('fallbackBackground', 'src/assets/background/river_night_bg.png');
     }
 
-    // REAL background image (make sure this path is correct)
+    // Real background image
     this.load.image('river_night_bg', 'src/assets/background/river_night_bg.png');
 
-    // traps
+    // Traps
     this.load.image('torpedo_barrel_01', 'src/assets/art/torpedo_barrel_01.png');
     this.load.image('torpedo_logframe_01', 'src/assets/art/torpedo_log_barrel_01.png');
-
-    // notebook
-    this.load.image('notebookOpen', 'src/assets/art/notebook_open.png');
 
     // AUDIO – just load; do not add/play here
     this.load.audio('boatWaterLoop', 'src/assets/audio/rowboat.mp3');
@@ -86,9 +80,10 @@ export class ScoutPracticeScene extends Phaser.Scene {
     intro?.stop();
 
     this.configData = {
-      backgroundKey: 'fallbackBackground',
-      trapKeys: ['torpedo_barrel_01', 'torpedo_logframe_01'],
-      notebookKey: 'notebookOpen',
+      backgroundKey: 'fallbackBackground', // or 'river_night_bg' if you prefer
+      trapKeys: data.trapKeys?.length
+        ? data.trapKeys
+        : ['torpedo_barrel_01', 'torpedo_logframe_01'],
       numTraps: data.numTraps ?? 100
     };
     this.maxTraps = this.configData.numTraps!;
@@ -104,7 +99,6 @@ export class ScoutPracticeScene extends Phaser.Scene {
       .image(width / 2, height / 2, this.configData.backgroundKey)
       .setScrollFactor(0);
 
-
     // Scale it like CSS "background-size: cover"
     const bgWidth = this.riverBg.width;
     const bgHeight = this.riverBg.height;
@@ -115,11 +109,11 @@ export class ScoutPracticeScene extends Phaser.Scene {
 
     this.riverBg.setScale(scale);
 
-    // Gentle background motion (vertical bob)
+    // Slight downward drift to simulate moving forward
     this.riverMotionTween = this.tweens.add({
       targets: this.riverBg,
-      y: this.riverBg.y + 10,  // move down a bit
-      duration: 6000,          // 6 seconds
+      y: this.riverBg.y + 40,  // moves river "down" under the boat
+      duration: 12000,         // 12 seconds for a slow slide
       yoyo: true,
       repeat: -1,
       ease: 'Sine.inOut'
@@ -150,7 +144,6 @@ export class ScoutPracticeScene extends Phaser.Scene {
       loop: true,
       callback: () => {
         if (this.trapsSpawned >= this.maxTraps) {
-          // When we hit the limit, show practice complete dialog once
           if (!this.isPracticeDialogOpen) {
             this.openPracticeDialog();
           }
@@ -161,24 +154,18 @@ export class ScoutPracticeScene extends Phaser.Scene {
       }
     });
 
-    // Score UI
+    // Score UI (top, prominent)
     this.createScoreUI();
 
-    // Simple overlay text (you can remove later)
-    this.add
-      .text(width / 2, 40, 'Scout Practice: River Patrol', {
-        fontSize: '28px',
-        color: '#ffffff'
-      })
-      .setOrigin(0.5);
-
+    // Instructions
     this.add.text(
       50,
       80,
       'Identify and click on the Confederate torpedos and traps as you pass them in your boat. This info is vital for the mission.\n' +
-      'They appear ahead, move closer, then pass by.',
+        'They appear ahead, move closer, then pass by.',
       {
-        fontSize: '18px',
+        fontSize: '20px',
+        backgroundColor: 'navyblue',
         color: '#ffffff',
         wordWrap: { width: width - 100 }
       }
@@ -196,17 +183,16 @@ export class ScoutPracticeScene extends Phaser.Scene {
     const { width, height } = this.scale;
 
     const x = Phaser.Math.Between(width * 0.2, width * 0.8);
-    const yStart = height * 0.4;
-    const yEnd = height * 0.9;
+    const yStart = height * 0.3;  // further "ahead"
+    const yEnd = height * 0.95;   // closer to "boat"
 
     const textureKey = Phaser.Utils.Array.GetRandom(this.configData.trapKeys);
     const sprite = this.add.sprite(x, yStart, textureKey).setInteractive({
       useHandCursor: true
     });
 
-    // Smaller at start and end
-    const startScale = 0.25;
-    const endScale = 0.4;
+    const startScale = 0.2;
+    const endScale = 0.5;
     sprite.setScale(startScale);
 
     const isExplosive = Math.random() < 0.7;
@@ -219,7 +205,7 @@ export class ScoutPracticeScene extends Phaser.Scene {
     sprite.on('pointerup', () => this.onTrapClicked(sprite));
     this.trapGroup.add(sprite);
 
-    const travelDuration = Phaser.Math.Between(4500, 5500);
+    const travelDuration = Phaser.Math.Between(3800, 4800);
 
     this.tweens.add({
       targets: sprite,
@@ -254,44 +240,33 @@ export class ScoutPracticeScene extends Phaser.Scene {
   }
 
   // -------------------------------------------------------------------------
-  // Score UI
+  // Score UI (top-center, no notebook, no coordinates)
   // -------------------------------------------------------------------------
 
   private createScoreUI() {
     this.score = 0;
 
-    const { width, height } = this.scale;
-
-    // Place the open notebook near bottom-left
-    this.notebookIcon = this.add
-      .sprite(40, height - 40, this.configData.notebookKey)
-      .setOrigin(0, 1)      // bottom-left of the sprite
-      .setScale(0.6)        // tweak 0.5–0.8 to taste
-      .setScrollFactor(0);
-
-    const nb = this.notebookIcon;
-
-    // Position text over the right-hand page
-    // These offsets are tuned to the generated art's layout:
-    const textOffsetX = nb.displayWidth * 0.55;   // move to right page
-    const textOffsetY = -nb.displayHeight * 0.55; // up into page area
-
-    const textX = nb.x + textOffsetX;
-    const textY = nb.y + textOffsetY;
+    const { width } = this.scale;
 
     this.scoreText = this.add
       .text(
-        textX,
-        textY,
-        'x 0\n[0.000, 0.000]',
+        width / 2,
+        20,
+        'Score: 0',
         {
-          fontSize: '20px',
-          color: '#2b2418',   // ink-like dark brown
+          fontSize: '32px',
+          color: '#ffff66',
+          stroke: '#000000',
+          strokeThickness: 4
         }
       )
-      .setOrigin(0, 0)       // top-left of the text block
+      .setOrigin(0.5, 0)
       .setScrollFactor(0);
   }
+
+  // -------------------------------------------------------------------------
+  // Practice dialog
+  // -------------------------------------------------------------------------
 
   private openPracticeDialog() {
     this.isPracticeDialogOpen = true;
@@ -402,24 +377,26 @@ export class ScoutPracticeScene extends Phaser.Scene {
 
   // Reset practice so player can continue
   private resetPractice() {
-    // Clear existing traps
-    this.trapGroup.clear(true, true); // remove and destroy all children
+    this.trapGroup.clear(true, true);
 
-    // Reset counters and score if you want a fresh run
     this.trapsSpawned = 0;
     this.maxTraps = this.configData.numTraps ?? 100;
     this.score = 0;
-    this.scoreText.setText('x 0\n[0.000, 0.000]');
+    this.scoreText.setText('Score: 0');
   }
+
+  // -------------------------------------------------------------------------
+  // Score handling with "Log recorded"
+  // -------------------------------------------------------------------------
 
   private addScore(points: number, worldX: number, worldY: number) {
     this.score += points;
 
-    const coordX = (worldX / this.scale.width).toFixed(3);
-    const coordY = (worldY / this.scale.height).toFixed(3);
-    this.scoreText.setText(`x ${this.score}\n[${coordX}, ${coordY}]`);
+    // Update score only
+    this.scoreText.setText(`Score: ${this.score}`);
 
-    const floatText = this.add
+    // Points popup
+    const floatPoints = this.add
       .text(worldX, worldY - 20, `+${points}`, {
         fontSize: '20px',
         color: '#ffff66',
@@ -429,12 +406,31 @@ export class ScoutPracticeScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.tweens.add({
-      targets: floatText,
+      targets: floatPoints,
       y: worldY - 60,
       alpha: 0,
       duration: 600,
       ease: 'Sine.out',
-      onComplete: () => floatText.destroy()
+      onComplete: () => floatPoints.destroy()
+    });
+
+    // "Log recorded" message
+    const logText = this.add
+      .text(worldX, worldY + 10, 'Log recorded', {
+        fontSize: '16px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 2
+      })
+      .setOrigin(0.5);
+
+    this.tweens.add({
+      targets: logText,
+      y: worldY - 10,
+      alpha: 0,
+      duration: 700,
+      ease: 'Sine.out',
+      onComplete: () => logText.destroy()
     });
   }
 
@@ -594,11 +590,9 @@ export class ScoutPracticeScene extends Phaser.Scene {
     soundText.on('pointerup', () => {
       this.isSoundEnabled = !this.isSoundEnabled;
 
-      // Toggle only boat loop + future sounds
       if (this.boatLoopSound) {
         this.boatLoopSound.setMute(!this.isSoundEnabled);
       }
-      // Any other SFX check isSoundEnabled before playing (already done for pencil)
 
       soundText.setText(this.isSoundEnabled ? 'Sound: On' : 'Sound: Off');
     });
