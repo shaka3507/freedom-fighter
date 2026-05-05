@@ -416,8 +416,8 @@ export class ScoutPracticeScene extends Phaser.Scene {
 
     // "Log recorded" message
     const logText = this.add
-      .text(worldX, worldY + 10, 'Log recorded', {
-        fontSize: '16px',
+      .text(worldX, worldY + 10, 'Trap recorded', {
+        fontSize: '20px',
         color: '#ffffff',
         stroke: '#000000',
         strokeThickness: 2
