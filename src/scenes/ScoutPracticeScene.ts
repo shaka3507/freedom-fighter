@@ -528,6 +528,7 @@ export class ScoutPracticeScene extends Phaser.Scene {
 
     this.confirmLeaveBtn.on('pointerup', () => {
       this.cameras.main.fadeOut(300, 0, 0, 0);
+      this.boatLoopSound?.stop();
       this.cameras.main.once(
         Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
         () => this.scene.start('MenuScene')
