@@ -5,13 +5,22 @@ export class MenuScene extends Phaser.Scene {
     super('MenuScene');
   }
 
+  preload() {
+    this.load.image('backgroundMenu', 'src/assets/background/beautiful_creek_night.png');
+  }
+
   create() {
     const FONT_FAMILY = 'Play';
     const { width, height } = this.scale;
 
     this.cameras.main.fadeIn(500, 0, 0, 0);
+    
 
     const music = this.sound.get('introMusic') as Phaser.Sound.BaseSound | null;
+
+    this.add.image(0, 0, 'backgroundMenu')
+      .setOrigin(0, 0)
+      .setDisplaySize(width, height);
 
     // 👇 Everything that uses the font goes inside active()
     WebFont.load({
@@ -21,6 +30,7 @@ export class MenuScene extends Phaser.Scene {
           fontFamily: FONT_FAMILY,
           fontSize: '48px',
           color: '#ffffff',
+          backgroundColor: 'navyblue',
         }).setOrigin(0.5);
 
         const options = [
@@ -39,6 +49,7 @@ export class MenuScene extends Phaser.Scene {
             .text(width / 2, startY + index * gap, opt.label, {
               fontSize: '48px',
               color: '#fff',
+              backgroundColor: 'navyblue',
               fontFamily: FONT_FAMILY,
             })
             .setOrigin(0.5)

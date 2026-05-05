@@ -5,7 +5,8 @@ type CampHotspotId =
   | 'invoice'
   | 'medical'
   | 'evac_flyer'
-  | 'liberated_list';
+  | 'liberated_list'
+  | 'river_map'
 
 type HotspotType = 'document'; // you can add 'flavor' later if needed
 
@@ -52,6 +53,7 @@ export class CampScene extends Phaser.Scene {
     this.load.image('img_josie_king_taylor', 'src/assets/docs/josie_king_taylor.png');
     this.load.image('img_confed_evac_flyer', 'src/assets/docs/confederate_evac_flyer.png');
     this.load.image('img_self_liberated_list', 'src/assets/docs/self_liberated_list.png');
+    this.load.image('img_river_map', 'src/assets/docs/combahee_plantation_map.png');
   }
 
   create() {
@@ -136,6 +138,19 @@ export class CampScene extends Phaser.Scene {
           'During the war effort, an estimated 500,000 enslaved laborers freed themselves (self emancipation).' +
           "Many joined the war effort - by the war's end, about 186,000 Black people served in the Union army." +
           'Black soldiers not only took arms against the Confederacy, they served as scouts, spies, nurses and tradespeople.'
+      },
+      {
+        id: 'river_map',
+        type: 'document',
+        x: width * 0.18,
+        y: height * 0.8,
+        width: width,
+        height: 300,
+        title: 'Map of Combahee River',
+        label: 'Map for Navigation',
+        docImageKey: 'img_river_map',
+        docDescription:
+          'With the help of many Black spies, maps like this were created identifying the plantations along waterways in low country, South Carolina.'
       }
     ];
 
