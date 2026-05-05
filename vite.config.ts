@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vite'
 
 export default defineConfig({
-  root: '.',
+  base: '/freedom-fighter/',
   build: {
-    outDir: 'dist'
-  }
-});
+    outDir: 'dist',
+  },
+})
