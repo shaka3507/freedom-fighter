@@ -45,15 +45,16 @@ export class CampScene extends Phaser.Scene {
   private isDocOpen = false;
 
   preload() {
+    this.load.setBaseURL(import.meta.env.BASE_URL)
     // Camp background
-    this.load.image('camp_bg', 'src/assets/background/camp_bg.png');
+    this.load.image('camp_bg', 'assets/background/camp_bg.png');
 
     // Document / photo images (adjust paths/names as needed)
-    this.load.image('img_tubman_invoice', 'src/assets/docs/tubman_invoice.png');
-    this.load.image('img_josie_king_taylor', 'src/assets/docs/josie_king_taylor.png');
-    this.load.image('img_confed_evac_flyer', 'src/assets/docs/confederate_evac_flyer.png');
-    this.load.image('img_self_liberated_list', 'src/assets/docs/self_liberated_list.png');
-    this.load.image('img_river_map', 'src/assets/docs/combahee_plantation_map.png');
+    this.load.image('img_tubman_invoice', 'assets/docs/tubman_invoice.png');
+    this.load.image('img_josie_king_taylor', 'assets/docs/josie_king_taylor.png');
+    this.load.image('img_confed_evac_flyer', 'assets/docs/confederate_evac_flyer.png');
+    this.load.image('img_self_liberated_list', 'assets/docs/self_liberated_list.png');
+    this.load.image('img_river_map', 'assets/docs/combahee_plantation_map.png');
   }
 
   create() {

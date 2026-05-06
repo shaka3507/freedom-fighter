@@ -57,21 +57,22 @@ export class ScoutPracticeScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.setBaseURL(import.meta.env.BASE_URL)
     // Fallback background (optional)
     if (!this.textures.exists('fallbackBackground')) {
-      this.load.image('fallbackBackground', 'src/assets/background/river_night_bg.png');
+      this.load.image('fallbackBackground', 'assets/background/river_night_bg.png');
     }
 
     // Real background image
-    this.load.image('river_night_bg', 'src/assets/background/river_night_bg.png');
+    this.load.image('river_night_bg', 'assets/background/river_night_bg.png');
 
     // Traps
-    this.load.image('torpedo_barrel_01', 'src/assets/art/torpedo_barrel_01.png');
-    this.load.image('torpedo_logframe_01', 'src/assets/art/torpedo_log_barrel_01.png');
+    this.load.image('torpedo_barrel_01', 'assets/art/torpedo_barrel_01.png');
+    this.load.image('torpedo_logframe_01', 'assets/art/torpedo_log_barrel_01.png');
 
     // AUDIO – just load; do not add/play here
-    this.load.audio('boatWaterLoop', 'src/assets/audio/rowboat.mp3');
-    this.load.audio('sfxPencil', 'src/assets/audio/pencil.mp3');
+    this.load.audio('boatWaterLoop', 'assets/audio/rowboat.mp3');
+    this.load.audio('sfxPencil', 'assets/audio/pencil.mp3');
   }
 
   create(data: ScoutPracticeSceneConfig) {

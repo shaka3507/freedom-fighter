@@ -6,7 +6,8 @@ export class MenuScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('backgroundMenu', 'src/assets/background/beautiful_creek_night.png');
+    this.load.setBaseURL(import.meta.env.BASE_URL)
+    this.load.image('backgroundMenu', 'assets/background/beautiful_creek_night.png');
   }
 
   create() {

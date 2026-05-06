@@ -7,8 +7,9 @@ export class ExitScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.setBaseURL(import.meta.env.BASE_URL)
     // Arguments: (key, path)
-    this.load.image('backgroundExit', 'src/assets/background/quit_scene_bg.png');
+    this.load.image('backgroundExit', 'assets/background/quit_scene_bg.png');
   }
 
   create() {

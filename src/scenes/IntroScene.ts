@@ -8,8 +8,9 @@ export class IntroScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('backgroundIntro', 'src/assets/background/intro_scene_background.png');
-    this.load.audio('introMusic', 'src/assets/audio/forest-sound.mp3');
+    this.load.setBaseURL(import.meta.env.BASE_URL)
+    this.load.image('backgroundIntro', 'assets/background/intro_scene_background.png');
+    this.load.audio('introMusic', 'assets/audio/forest-sound.mp3');
   }
 
   create() {

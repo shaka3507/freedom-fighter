@@ -6,7 +6,8 @@ export class HelpScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('backgroundHelp', 'src/assets/background/help_scene_background.png');
+    this.load.setBaseURL(import.meta.env.BASE_URL)
+    this.load.image('backgroundHelp', 'assets/background/help_scene_background.png');
   }
 
   create() {
