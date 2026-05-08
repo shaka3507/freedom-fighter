@@ -8,6 +8,7 @@ export class HelpScene extends Phaser.Scene {
   preload() {
     this.load.setBaseURL(import.meta.env.BASE_URL)
     this.load.image('backgroundHelp', 'assets/background/help_scene_background.png');
+    this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
   }
 
   create() {
@@ -19,32 +20,34 @@ export class HelpScene extends Phaser.Scene {
       .setDisplaySize(width, height);
 
     this.addBackButton();
-    this.addStopMusicButton();
+    // this.addStopMusicButton();
     this.addBackstoryText(width, height); // 👈 Pass dimensions
   }
 
   private addBackstoryText(width: number, height: number) {
     const EXPLAINER_TEXT = "Welcome to late May 1863. You're a scout for the Federal Army (Union), and was born into slavery. You have the honor of working with 'Moses', a.k.a. Harriet Tubman. The mission is dangerous - you and other freed men are going to raid several plantations in the Carolinas low country. Not only will this be an extreme blow to the Confederates, hundreds of Freedom Seekers will finally be free. Your mission is to find traps set by the Confederate army, and collect momentos to bring back home. Enter camp or scout practice to help complete your mission.";
-    const DIRECTIONS_TEXT = "1) Visit camp to collect mementos and artifacts to bring back home. \n\n2) Practice scouting by identifying traps and explosives hidden by the Confederate Army."
-    this.add.text(width / 2, height / 2, EXPLAINER_TEXT, {
-      fontSize: '24px',
-      color: '#ffffff',
-      backgroundColor: '#000000',
-      padding: { x: 20, y: 20 },
-      wordWrap: { width: width * 0.6 },
-      align: 'left',
-    }).setOrigin(0.5, 0.5);
+    const DIRECTIONS_TEXT = "Your Mission: \n\n1) Visit camp to collect mementos and artifacts to bring back home. \n\n2) Practice scouting by identifying traps and explosives hidden by the Confederate Army."
 
-    this.add.text(width / 2, height / 2, DIRECTIONS_TEXT, {
-      fontSize: '36px',
-      color: '#000',
-      backgroundColor: '#fff',
-      padding: { x: 20, y: 20 },
-      wordWrap: { width: width * 0.7 },
-      align: 'left',
-    }).setOrigin(0.5, -1);
+    const FONT_FAMILY = 'Cardo'
+    // 👇 Everything that uses the font goes inside active()
+    WebFont.load({
+      google: {
+        families: [FONT_FAMILY]
+      },
+      active: () => {
+        this.add.text(width / 2, height / 2, EXPLAINER_TEXT + '\n\n' + DIRECTIONS_TEXT, {
+          fontSize: '28px',
+          color: '#ffffff',
+          backgroundColor: '#000000',
+          fontFamily: FONT_FAMILY,
+          padding: { x: 20, y: 20 },
+          wordWrap: { width: width * 0.6 },
+          align: 'left',
+        }).setOrigin(0.5, 0.5);
+      }
+    })
   }
-  
+
 
   private addBackButton() {
     const back = this.add
@@ -54,6 +57,8 @@ export class HelpScene extends Phaser.Scene {
         color: '#ffff00',
       })
       .setInteractive({ useHandCursor: true });
+
+    
 
     back.on('pointerup', () => {
       this.cameras.main.fadeOut(300, 0, 0, 0);

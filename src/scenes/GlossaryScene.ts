@@ -1,5 +1,8 @@
 // src/scenes/GlossaryScene.ts
 import * as Phaser from 'phaser';
+import WebFont from 'webfontloader';
+
+const FONT = 'Cardo';
 
 interface GlossaryItem {
   term: string;
@@ -15,7 +18,7 @@ export class GlossaryScene extends Phaser.Scene {
   private glossaryItems: GlossaryItem[] = [
     {
       term: 'Combahee River',
-      pronunciation: '(/kəmˈbiː/; “kəm-BEE”)',
+      pronunciation: '(/kəmˈbiː/; "kəm-BEE")',
       definition:
         'A short blackwater river in the southern Lowcountry region of South Carolina, ' +
         'formed at the confluence of the Salkehatchie and Little Salkehatchie rivers near Islandton in Colleton County. ' +
@@ -24,9 +27,9 @@ export class GlossaryScene extends Phaser.Scene {
     },
     {
       term: 'Combahee River Raid',
-      pronunciation: '(/kəmˈbiː/; “kəm-BEE”)',
+      pronunciation: '(/kəmˈbiː/; "kəm-BEE")',
       definition:
-        'On June 1st and 2nd, Harriet Tubman and the 2nd South Carolina Infantry raided several plantations along the Combahee River,' + 
+        'On June 1st and 2nd, Harriet Tubman and the 2nd South Carolina Infantry raided several plantations along the Combahee River,' +
         'which led to the emancipation of more than 700 enslaved laborers. There were no casualties recorded and several plantations were burnt to the ground.'
     },
     {
@@ -44,15 +47,8 @@ export class GlossaryScene extends Phaser.Scene {
         "Acts could include getting married against an enslaver's wishes, participating in an uprising or running away slavery." +
         "Some historians estimate at least 250 uprisings occurred from 1619 until the passing of the 13th amendment in 1865, which abolished slavery."
     },
-    // Add more items here later:
-    // {
-    //   term: 'Harriet Tubman',
-    //   pronunciation: '',
-    //   definition: '...'
-    // },
   ];
 
-  // For simple scrolling
   private contentContainer!: Phaser.GameObjects.Container;
   private scrollY = 0;
   private maxScrollY = 0;
@@ -61,32 +57,40 @@ export class GlossaryScene extends Phaser.Scene {
     const { width, height } = this.scale;
     this.cameras.main.fadeIn(400, 0, 0, 0);
 
-    // Title
-    this.add
-      .text(width / 2, 40, 'Glossary', {
-        fontSize: '40px',
-        color: '#ffffff'
-      })
-      .setOrigin(0.5);
+    WebFont.load({
+      google: {
+        families: [FONT]
+      },
+      active: () => {
+        // Title
+        this.add
+          .text(width / 2, 40, 'Glossary', {
+            fontSize: '40px',
+            color: '#ffffff',
+            fontFamily: FONT
+          })
+          .setOrigin(0.5);
 
-    this.addBackButton();
+        this.addBackButton();
 
-    // Instructions
-    this.add
-      .text(
-        width / 2,
-        80,
-        'Learn more about the terms and people referenced during your game play.',
-        {
-          fontSize: '20px',
-          color: '#ffffff',
-          align: 'center'
-        }
-      )
-      .setOrigin(0.5);
+        // Instructions
+        this.add
+          .text(
+            width / 2,
+            80,
+            'Learn more about the terms and people referenced during your game play.',
+            {
+              fontSize: '20px',
+              color: '#ffffff',
+              align: 'center',
+              fontFamily: FONT
+            }
+          )
+          .setOrigin(0.5);
 
-    this.addGlossaryList(width, height);
-    // this.enableScrollInput();
+        this.addGlossaryList(width, height);
+      }
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -94,8 +98,7 @@ export class GlossaryScene extends Phaser.Scene {
   // ---------------------------------------------------------------------------
 
   private addGlossaryList(width: number, height: number) {
-    // This container will hold all glossary entries
-    this.contentContainer = this.add.container(0, 130); // start below header
+    this.contentContainer = this.add.container(0, 130);
 
     const leftMargin = width * 0.1;
     const contentWidth = width * 0.8;
@@ -105,12 +108,11 @@ export class GlossaryScene extends Phaser.Scene {
     const cardSpacing = 16;
 
     this.glossaryItems.forEach((item) => {
-      // Background card for each entry
       const card = this.add.rectangle(
         width / 2,
         currentY,
         contentWidth,
-        0, // we'll set real height after measuring text
+        0,
         0x000,
         1
       ).setOrigin(0.5, 0);
@@ -124,6 +126,7 @@ export class GlossaryScene extends Phaser.Scene {
           fontSize: '26px',
           color: 'white',
           fontStyle: 'bold',
+          fontFamily: FONT,
           wordWrap: { width: contentWidth - cardPadding * 2 }
         }
       );
@@ -138,8 +141,10 @@ export class GlossaryScene extends Phaser.Scene {
           lineY,
           item.pronunciation,
           {
-            fontSize: '18px',
-            color: '#333333',
+            fontSize: '22px',
+            color: '#aaaaaa',
+            fontStyle: 'italic',
+            fontFamily: FONT,
             wordWrap: { width: contentWidth - cardPadding * 2 }
           }
         );
@@ -152,8 +157,9 @@ export class GlossaryScene extends Phaser.Scene {
         lineY,
         item.definition,
         {
-          fontSize: '20px',
+          fontSize: '24px',
           color: 'white',
+          fontFamily: FONT,
           wordWrap: { width: contentWidth - cardPadding * 2 }
         }
       );
@@ -163,7 +169,6 @@ export class GlossaryScene extends Phaser.Scene {
 
       card.height = cardHeight;
 
-      // Add all elements to container
       this.contentContainer.add(card);
       this.contentContainer.add(termText);
       if (pronText) this.contentContainer.add(pronText);
@@ -172,8 +177,7 @@ export class GlossaryScene extends Phaser.Scene {
       currentY += cardHeight + cardSpacing;
     });
 
-    // Compute how far we can scroll
-    const visibleHeight = height - 140; // bottom space after header
+    const visibleHeight = height - 140;
     const contentHeight = currentY;
     this.maxScrollY = Math.max(0, contentHeight - visibleHeight);
   }
@@ -184,7 +188,7 @@ export class GlossaryScene extends Phaser.Scene {
 
   private enableScrollInput() {
     this.input.on('wheel', (_pointer, _gameObjects, _dx, dy) => {
-      this.scrollBy(dy * 0.5); // adjust factor for sensitivity
+      this.scrollBy(dy * 0.5);
     });
 
     let isDragging = false;
@@ -215,11 +219,9 @@ export class GlossaryScene extends Phaser.Scene {
     this.scrollY += deltaY;
     this.scrollY = Phaser.Math.Clamp(this.scrollY, 0, this.maxScrollY);
 
-    // Container Y is header offset minus scroll amount
-    const baseY = 130; // same as in addGlossaryList
+    const baseY = 130;
     this.contentContainer.y = baseY - this.scrollY;
 
-    // Optional: clamp content so it doesn't float too far
     const minY = height - (this.maxScrollY + baseY);
     this.contentContainer.y = Phaser.Math.Clamp(this.contentContainer.y, minY, baseY);
   }
@@ -238,8 +240,9 @@ export class GlossaryScene extends Phaser.Scene {
   private addBackButton() {
     const back = this.add
       .text(20, 20, '< Back to Menu', {
-        fontSize: '20px',
-        color: '#ffff00'
+        fontSize: '28px',
+        color: '#ffff00',
+        fontFamily: FONT
       })
       .setInteractive({ useHandCursor: true });
 

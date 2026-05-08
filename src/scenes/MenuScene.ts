@@ -8,10 +8,11 @@ export class MenuScene extends Phaser.Scene {
   preload() {
     this.load.setBaseURL(import.meta.env.BASE_URL)
     this.load.image('backgroundMenu', 'assets/background/beautiful_creek_night.png');
+    this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
   }
 
   create() {
-    const FONT_FAMILY = 'Play';
+    const FONT_FAMILY = 'Cardo';
     const { width, height } = this.scale;
 
     this.cameras.main.fadeIn(500, 0, 0, 0);
@@ -25,11 +26,14 @@ export class MenuScene extends Phaser.Scene {
 
     // 👇 Everything that uses the font goes inside active()
     WebFont.load({
-      google: { families: ['Play'] },
+      google: {
+          families: [FONT_FAMILY]
+      },
       active: () => { 
         this.add.text(width / 2, height * 0.2, 'Main Menu', {
-          fontFamily: FONT_FAMILY,
+          fontFamily: FONT_FAMILY, 
           fontSize: '48px',
+          letterSpacing: 2,
           color: '#ffffff',
           backgroundColor: 'navyblue',
         }).setOrigin(0.5);
