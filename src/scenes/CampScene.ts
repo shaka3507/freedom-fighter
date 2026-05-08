@@ -91,9 +91,11 @@ export class CampScene extends Phaser.Scene {
         label: "Tubman's Tent",
         docImageKey: 'img_tubman_invoice',
         docDescription:
-          'This document is an invoice connected to Harriet Tubman’s work with the Union Army. ' +
-          'It offers a glimpse into how her labor, leadership, and intelligence work were recorded—' +
-          'and how often the value of that work was underestimated or left out of the official story.'
+          'Context: This document is an invoice connected to Harriet Tubman’s work with the Union Army during the Civil War. It is one of the rare official records that mention her labor and leadership.\n\n' +
+          'Notice: Look closely at the handwriting, the amounts, and how Tubman’s work is described. What kinds of tasks are listed, and what seems to be missing?\n\n' +
+          'Think: What does this record suggest about how the Army recognized (or failed to recognize) Tubman’s intelligence work and leadership? Whose work usually gets written down—and whose doesn’t?\n\n' +
+          'Connect: Tubman led scouting, planning, and guiding missions like the Combahee River raid. How might the limited way this invoice describes her work shape how people remember her role in the war?\n\n' +
+          'Key idea: Even when Black women’s leadership was essential, official records often underestimated or erased the full value of their work.'
       },
       {
         id: 'medical',
@@ -106,9 +108,11 @@ export class CampScene extends Phaser.Scene {
         label: 'Medical tent',
         docImageKey: 'img_josie_king_taylor',
         docDescription:
-          'Many women helped out the official war effort, including fighting, teaching and leading medical efforts. Susie King Taylor, pictured here, was a nurse who served during the Civil War era. ' +
-          'Black women like Taylor cared for wounded soldiers and formerly enslaved people.' +
-          ' Susie King Taylor was also passionate about education and taught Black soldiers how to read and write between battles. She was also known to be a "great shot".'
+          'Context: This image shows Susie King Taylor, a Black nurse, teacher, and later author who served during the Civil War. Women like Taylor played key roles in caring for soldiers and self-liberated people.\n\n' +
+          'Notice: Look at how she is dressed and posed. What details suggest her skills, status, or confidence? Imagine the kinds of injuries and illnesses she would have treated in camp.\n\n' +
+          'Think: Taylor taught Black soldiers to read and write between battles and was known to be a skilled markswoman. How does this challenge narrow ideas about what women, and especially Black women, did in wartime?\n\n' +
+          'Connect: During missions like the Combahee River raid, wounded soldiers and newly freed families needed care, information, and education. How might people like Taylor have helped them survive and build new lives?\n\n' +
+          'Key idea: Black women were not only helpers but skilled nurses, educators, and defenders whose expertise supported both the war effort and the lives of self-liberated people.'
       },
       {
         id: 'evac_flyer',
@@ -121,9 +125,11 @@ export class CampScene extends Phaser.Scene {
         label: 'Enemy Items',
         docImageKey: 'img_confed_evac_flyer',
         docDescription:
-          'This captured Confederate flier orders the evacuation of enslaved laborers ahead of incoming Union forces. ' +
-          'It shows how deeply the Confederate war effort depended on enslaved people, and how worried they were ' +
-          'that freedom seekers would join the Union lines once the army drew near.'
+          'Context: This captured Confederate flier orders enslaved laborers to be moved away before Union forces arrive. Confederate leaders feared what might happen if enslaved people reached Union lines.\n\n' +
+          'Notice: Read the language used in the notice. How are enslaved people described? What seems urgent or threatening to the Confederates?\n\n' +
+          'Think: Why would the Confederacy spend time and energy trying to move enslaved workers away from Union troops? What does that tell you about how much their war effort depended on enslaved labor?\n\n' +
+          'Connect: During the Combahee River raid, hundreds of enslaved people used the arrival of Union gunboats and guides like Harriet Tubman as a chance to escape. How does this notice reveal Confederate fears about those kinds of escapes?\n\n' +
+          'Key idea: Confederate leaders knew enslaved people could change the course of the war by fleeing to Union lines and using their knowledge and labor against slavery.'
       },
       {
         id: 'liberated_list',
@@ -136,9 +142,11 @@ export class CampScene extends Phaser.Scene {
         label: 'Self Emancipation Efforts Documents',
         docImageKey: 'img_self_liberated_list',
         docDescription:
-          'During the war effort, an estimated 500,000 enslaved laborers freed themselves (self emancipation).' +
-          "Many joined the war effort - by the war's end, about 186,000 Black people served in the Union army." +
-          'Black soldiers not only took arms against the Confederacy, they served as scouts, spies, nurses and tradespeople.'
+          'Context: This kind of list recorded some of the many enslaved people who freed themselves by reaching Union lines during the Civil War. Historians estimate that around 500,000 enslaved people self-emancipated during the conflict.\n\n' +
+          'Notice: Look at how people are listed. Do you see names, ages, family groups, or notes about where they came from? What might be missing from a list like this?\n\n' +
+          'Think: By the end of the war, about 186,000 Black people served in the Union Army, and many others supported the war effort in other ways. What risks did they take to escape and then fight or work for the Union?\n\n' +
+          'Connect: The Combahee River raid helped more than 700 enslaved people seize a moment to escape by boarding Union gunboats. How might lists like this one help us remember their choices and experiences today?\n\n' +
+          'Key idea: Enslaved people were not just freed by others—they actively freed themselves and transformed the war through their own decisions and courage.'
       },
       {
         id: 'river_map',
@@ -151,7 +159,11 @@ export class CampScene extends Phaser.Scene {
         label: 'Map for Navigation',
         docImageKey: 'img_river_map',
         docDescription:
-          'With the help of many Black spies, maps like this were created identifying the plantations along waterways in low country, South Carolina.'
+          'Context: Maps like this identified plantations, river channels, and dangerous spots along the Combahee River in South Carolina’s low country. Much of this information came from Black scouts and local people who knew the land.\n\n' +
+          'Notice: Find the river, the plantations, and any markings that might show depths, landings, or obstacles. Where might gunboats travel safely, and where would it be risky?\n\n' +
+          'Think: Why would Union officers and Harriet Tubman rely on Black guides and spies to make a map like this? What could happen if they had the wrong information?\n\n' +
+          'Connect: During the Combahee River raid, Tubman used her knowledge, along with information from local people, to guide Union boats to specific plantations and help people escape. How does this map show the importance of local Black knowledge in planning the raid?\n\n' +
+          'Key idea: The success of the Combahee River raid depended on detailed knowledge of the land and waterways, much of it provided by Black scouts, pilots, and community members.'
       }
     ];
 
@@ -163,9 +175,12 @@ export class CampScene extends Phaser.Scene {
     this.add
       .text(
         width * 0.6, 20,
-        'Explore, learn and examine your Union basecamp.',
+        'Explore the Union basecamp. Click the ✴ icons to examine evidence.\n' +
+        'As you explore, look for clues about:\n' +
+        '- How Black women and men shaped the Combahee River raid\n' +
+        '- How enslaved people took the lead in seeking freedom',
         {
-          fontSize: '24px',
+          fontSize: '20px',
           backgroundColor: 'navyblue',
           color: '#ffffff',
           wordWrap: { width: width - 80 }
