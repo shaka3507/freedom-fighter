@@ -6,7 +6,7 @@ type CampHotspotId =
   | 'medical'
   | 'evac_flyer'
   | 'liberated_list'
-  | 'river_map'
+  | 'river_map';
 
 type HotspotType = 'document'; // you can add 'flavor' later if needed
 
@@ -26,6 +26,11 @@ interface CampHotspotConfig {
   // For document/image hotspots
   docImageKey?: string;
   docDescription?: string;
+
+  // Optional memento to encourage exploration
+  hasMemento?: boolean;
+  mementoName?: string;
+  mementoDescription?: string;
 }
 
 export class CampScene extends Phaser.Scene {
@@ -42,10 +47,21 @@ export class CampScene extends Phaser.Scene {
   private docImage?: Phaser.GameObjects.Image;
   private docText?: Phaser.GameObjects.Text;
   private docCloseText?: Phaser.GameObjects.Text;
+  private mementoText?: Phaser.GameObjects.Text;
   private isDocOpen = false;
 
+  // Intro overlay
+  private introOverlay?: Phaser.GameObjects.Rectangle;
+  private introPanel?: Phaser.GameObjects.Rectangle;
+  private introText?: Phaser.GameObjects.Text;
+  private introButton?: Phaser.GameObjects.Text;
+
+  // Memento state
+  private mementoCollected = false;
+  private mementoNotice?: Phaser.GameObjects.Text;
+
   preload() {
-    this.load.setBaseURL(import.meta.env.BASE_URL)
+    this.load.setBaseURL(import.meta.env.BASE_URL);
     // Camp background
     this.load.image('camp_bg', 'assets/background/camp_bg.png');
 
@@ -77,7 +93,7 @@ export class CampScene extends Phaser.Scene {
     bg.setScale(scale);
 
     // -----------------------------------------------------------------------
-    // Define hotspots (positions are approximate; tweak after you see them)
+    // Define hotspots (now with single summary text)
     // -----------------------------------------------------------------------
     this.hotspotConfigs = [
       {
@@ -91,11 +107,7 @@ export class CampScene extends Phaser.Scene {
         label: "Tubman's Tent",
         docImageKey: 'img_tubman_invoice',
         docDescription:
-          'Context: This document is an invoice connected to Harriet Tubman’s work with the Union Army during the Civil War. It is one of the rare official records that mention her labor and leadership.\n\n' +
-          'Notice: Look closely at the handwriting, the amounts, and how Tubman’s work is described. What kinds of tasks are listed, and what seems to be missing?\n\n' +
-          'Think: What does this record suggest about how the Army recognized (or failed to recognize) Tubman’s intelligence work and leadership? Whose work usually gets written down—and whose doesn’t?\n\n' +
-          'Connect: Tubman led scouting, planning, and guiding missions like the Combahee River raid. How might the limited way this invoice describes her work shape how people remember her role in the war?\n\n' +
-          'Key idea: Even when Black women’s leadership was essential, official records often underestimated or erased the full value of their work.'
+          'This invoice is one of the few official records that mentions Harriet Tubman’s work with the Union Army. It lists tasks and payments in narrow terms, but leaves out much of her intelligence work, leadership, and the danger she faced. Documents like this remind us that even when Black women’s contributions were essential to missions such as the Combahee River raid, the way their labor was recorded often underestimated or erased the full value of what they did.'
       },
       {
         id: 'medical',
@@ -108,11 +120,7 @@ export class CampScene extends Phaser.Scene {
         label: 'Medical tent',
         docImageKey: 'img_josie_king_taylor',
         docDescription:
-          'Context: This image shows Susie King Taylor, a Black nurse, teacher, and later author who served during the Civil War. Women like Taylor played key roles in caring for soldiers and self-liberated people.\n\n' +
-          'Notice: Look at how she is dressed and posed. What details suggest her skills, status, or confidence? Imagine the kinds of injuries and illnesses she would have treated in camp.\n\n' +
-          'Think: Taylor taught Black soldiers to read and write between battles and was known to be a skilled markswoman. How does this challenge narrow ideas about what women, and especially Black women, did in wartime?\n\n' +
-          'Connect: During missions like the Combahee River raid, wounded soldiers and newly freed families needed care, information, and education. How might people like Taylor have helped them survive and build new lives?\n\n' +
-          'Key idea: Black women were not only helpers but skilled nurses, educators, and defenders whose expertise supported both the war effort and the lives of self-liberated people.'
+          'This image of Susie King Taylor, a Black nurse, teacher, and later author, shows one of the many ways Black women contributed to the Civil War. Women like Taylor treated wounds and illness, taught Black soldiers to read and write, and sometimes even learned to use weapons. Their work in camps and near the front lines supported both the Union war effort and the lives of self-liberated people, challenging narrow ideas about what women—and especially Black women—did in wartime.'
       },
       {
         id: 'evac_flyer',
@@ -125,11 +133,7 @@ export class CampScene extends Phaser.Scene {
         label: 'Enemy Items',
         docImageKey: 'img_confed_evac_flyer',
         docDescription:
-          'Context: This captured Confederate flier orders enslaved laborers to be moved away before Union forces arrive. Confederate leaders feared what might happen if enslaved people reached Union lines.\n\n' +
-          'Notice: Read the language used in the notice. How are enslaved people described? What seems urgent or threatening to the Confederates?\n\n' +
-          'Think: Why would the Confederacy spend time and energy trying to move enslaved workers away from Union troops? What does that tell you about how much their war effort depended on enslaved labor?\n\n' +
-          'Connect: During the Combahee River raid, hundreds of enslaved people used the arrival of Union gunboats and guides like Harriet Tubman as a chance to escape. How does this notice reveal Confederate fears about those kinds of escapes?\n\n' +
-          'Key idea: Confederate leaders knew enslaved people could change the course of the war by fleeing to Union lines and using their knowledge and labor against slavery.'
+          'This captured Confederate notice orders enslaved laborers to be moved away before Union forces arrive. The language reveals how Confederates treated enslaved people as property while urgently trying to keep them from reaching Union lines. The effort spent on moving enslaved workers shows how deeply the Confederate war machine depended on their labor—and how much leaders feared that escapes to Union forces, like those during the Combahee River raid, could weaken their cause.'
       },
       {
         id: 'liberated_list',
@@ -142,11 +146,7 @@ export class CampScene extends Phaser.Scene {
         label: 'Self Emancipation Efforts Documents',
         docImageKey: 'img_self_liberated_list',
         docDescription:
-          'Context: This kind of list recorded some of the many enslaved people who freed themselves by reaching Union lines during the Civil War. Historians estimate that around 500,000 enslaved people self-emancipated during the conflict.\n\n' +
-          'Notice: Look at how people are listed. Do you see names, ages, family groups, or notes about where they came from? What might be missing from a list like this?\n\n' +
-          'Think: By the end of the war, about 186,000 Black people served in the Union Army, and many others supported the war effort in other ways. What risks did they take to escape and then fight or work for the Union?\n\n' +
-          'Connect: The Combahee River raid helped more than 700 enslaved people seize a moment to escape by boarding Union gunboats. How might lists like this one help us remember their choices and experiences today?\n\n' +
-          'Key idea: Enslaved people were not just freed by others—they actively freed themselves and transformed the war through their own decisions and courage.'
+          'Lists like this recorded some of the many enslaved people who freed themselves by reaching Union lines during the Civil War. They sometimes note names, ages, family groups, or places of origin, but they rarely capture the full stories of risk, planning, and courage behind each journey. Historians estimate that hundreds of thousands of enslaved people self-emancipated, and many later served in the Union Army or supported its work. The Combahee River raid alone helped more than 700 people escape, reminding us that enslaved people were active agents in claiming their own freedom.'
       },
       {
         id: 'river_map',
@@ -159,36 +159,141 @@ export class CampScene extends Phaser.Scene {
         label: 'Map for Navigation',
         docImageKey: 'img_river_map',
         docDescription:
-          'Context: Maps like this identified plantations, river channels, and dangerous spots along the Combahee River in South Carolina’s low country. Much of this information came from Black scouts and local people who knew the land.\n\n' +
-          'Notice: Find the river, the plantations, and any markings that might show depths, landings, or obstacles. Where might gunboats travel safely, and where would it be risky?\n\n' +
-          'Think: Why would Union officers and Harriet Tubman rely on Black guides and spies to make a map like this? What could happen if they had the wrong information?\n\n' +
-          'Connect: During the Combahee River raid, Tubman used her knowledge, along with information from local people, to guide Union boats to specific plantations and help people escape. How does this map show the importance of local Black knowledge in planning the raid?\n\n' +
-          'Key idea: The success of the Combahee River raid depended on detailed knowledge of the land and waterways, much of it provided by Black scouts, pilots, and community members.'
+          'This map of the Combahee River and nearby plantations helped Union officers plan how to move gunboats safely through shallow channels and past dangerous obstacles. Much of the detailed knowledge needed to make a map like this came from Black scouts, pilots, and local community members who knew the land and waterways firsthand. During the Combahee River raid, Harriet Tubman drew on information from these guides to lead boats to specific plantations and coordinate escape routes, showing how local Black knowledge was central to the mission’s success.',
+        hasMemento: true,
+        mementoName: 'River Pilot’s Token',
+        mementoDescription:
+          'You pick up a small carved token used by a Black river pilot to remember the twists of the Combahee. It represents the detailed local knowledge that made the raid possible.'
       }
     ];
 
     this.createHotspots();
 
     // -----------------------------------------------------------------------
-    // Title / instructions (overlay text)
+    // Simple on-screen reminder / guiding question
     // -----------------------------------------------------------------------
     this.add
       .text(
-        width * 0.6, 20,
-        'Explore the Union basecamp. Click the ✴ icons to examine evidence.\n' +
-        'As you explore, look for clues about:\n' +
-        '- How Black women and men shaped the Combahee River raid\n' +
-        '- How enslaved people took the lead in seeking freedom',
+        width * 0.5,
+        20,
+        'Guiding question: How did Black women and men use their skills\nand knowledge to turn a Union camp into a base for freedom?',
         {
           fontSize: '20px',
-          backgroundColor: 'navyblue',
+          backgroundColor: '#000044',
           color: '#ffffff',
+          align: 'center',
           wordWrap: { width: width - 80 }
         }
       )
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0);
+
+    // Memento status text (updates when collected)
+    this.mementoNotice = this.add
+      .text(
+        width - 20,
+        height - 20,
+        'Memento: not yet found',
+        {
+          fontSize: '18px',
+          color: '#ffffaa',
+          backgroundColor: 'rgba(0,0,0,0.5)'
+        }
+      )
+      .setOrigin(1, 1)
       .setScrollFactor(0);
 
     this.addBackButton();
+
+    // Show intro overlay last so it sits on top
+    this.showIntroOverlay();
+  }
+
+  // -------------------------------------------------------------------------
+  // Intro overlay with grounding text + guiding question
+  // -------------------------------------------------------------------------
+
+  private showIntroOverlay() {
+    const { width, height } = this.scale;
+
+    this.introOverlay = this.add.rectangle(
+      width / 2,
+      height / 2,
+      width,
+      height,
+      0x000000,
+      0.8
+    );
+    this.introOverlay.setDepth(3000);
+
+    const panelWidth = width * 0.8;
+    const panelHeight = height * 0.6;
+
+    this.introPanel = this.add
+      .rectangle(
+        width / 2,
+        height / 2,
+        panelWidth,
+        panelHeight,
+        0x111111,
+        0.95
+      )
+      .setStrokeStyle(3, 0xffffff);
+    this.introPanel.setDepth(3001);
+
+    const introTextContent =
+      'Union Camp on the Combahee River, 1863.\n\n' +
+      'Gunboats rest at the river’s edge. Tents crowd the shoreline. ' +
+      'Some people here are soldiers, some are nurses and teachers, and many are newly self-liberated families ' +
+      'trying to decide what comes next.\n\n' +
+      'You are moving quietly through the camp, looking for clues about how the Combahee River raid was planned, ' +
+      'how it unfolded, and how it changed the lives of the people who escaped.\n\n' +
+      'Guiding question:\n' +
+      'How did Black women and men use their knowledge, skills, and courage to turn this camp and river into a path to freedom?\n\n' +
+      'Explore the ✴ icons around the camp. One object hides a small memento from the raid—see if you can find it.';
+
+    this.introText = this.add
+      .text(
+        width / 2,
+        height / 2 - panelHeight * 0.2,
+        introTextContent,
+        {
+          fontSize: '22px',
+          color: '#ffffff',
+          align: 'left',
+          wordWrap: { width: panelWidth - 80 }
+        }
+      )
+      .setOrigin(0.5, 0.5)
+      .setDepth(3002);
+
+    this.introButton = this.add
+      .text(
+        width / 2,
+        height / 2 + panelHeight * 0.25,
+        'Enter the camp',
+        {
+          fontSize: '24px',
+          color: '#ffff99',
+          backgroundColor: '#333333',
+          padding: { left: 16, right: 16, top: 8, bottom: 8 }
+        }
+      )
+      .setOrigin(0.5)
+      .setDepth(3002)
+      .setInteractive({ useHandCursor: true });
+
+    const closeIntro = () => {
+      this.introOverlay?.destroy();
+      this.introPanel?.destroy();
+      this.introText?.destroy();
+      this.introButton?.off('pointerup');
+      this.introButton?.destroy();
+    };
+
+    this.introButton.on('pointerup', closeIntro);
+    this.introOverlay.setInteractive({ useHandCursor: true });
+    this.introOverlay.on('pointerup', closeIntro);
   }
 
   // -------------------------------------------------------------------------
@@ -202,11 +307,7 @@ export class CampScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setInteractive({ useHandCursor: true });
 
-      // Optional: debug rectangle – uncomment to see hit areas
-      // const debugRect = this.add.rectangle(cfg.x, cfg.y, cfg.width, cfg.height, 0xffffff, 0.12);
-      // debugRect.setStrokeStyle(1, 0xffff00);
-
-      // Small icon circle + ? to mark hotspot
+      // Small icon circle + ✴ to mark hotspot
       const iconCircle = this.add.circle(
         cfg.x,
         cfg.y - cfg.height * 0.4, // slightly above the zone
@@ -217,30 +318,22 @@ export class CampScene extends Phaser.Scene {
       iconCircle.setStrokeStyle(2, 0xffffaa);
       iconCircle.setDepth(10);
 
-      const iconText = this.add.text(
-        iconCircle.x,
-        iconCircle.y,
-        '✴',
-        {
+      const iconText = this.add
+        .text(iconCircle.x, iconCircle.y, '✴', {
           fontSize: '24px',
           color: '#ffffaa'
-        }
-      )
+        })
         .setOrigin(0.5)
         .setDepth(11);
 
       // Optional label under the icon
       if (cfg.label) {
-        this.add.text(
-          iconCircle.x,
-          iconCircle.y + 28,
-          cfg.label,
-          {
+        this.add
+          .text(iconCircle.x, iconCircle.y + 28, cfg.label, {
             fontSize: '24px',
             color: '#ffffff',
             backgroundColor: 'rgba(0, 0, 0, 0.4)'
-          }
-        )
+          })
           .setOrigin(0.5)
           .setDepth(11);
       }
@@ -266,7 +359,7 @@ export class CampScene extends Phaser.Scene {
   }
 
   // -------------------------------------------------------------------------
-  // Document modal (full image + description)
+  // Document modal (full image + description + optional memento)
   // -------------------------------------------------------------------------
 
   private openDocumentModal(cfg: CampHotspotConfig) {
@@ -336,11 +429,45 @@ export class CampScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(2002);
 
+    let bottomY = height / 2 + panelHeight * 0.34;
+
+    // Optional memento pickup
+    if (cfg.hasMemento && !this.mementoCollected) {
+      this.mementoText = this.add
+        .text(
+          width / 2,
+          bottomY - 40,
+          `Memento found: ${cfg.mementoName}\nClick here to pick it up.`,
+          {
+            fontSize: '20px',
+            color: '#99ffcc',
+            align: 'center',
+            backgroundColor: '#003322',
+            padding: { left: 12, right: 12, top: 6, bottom: 6 }
+          }
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(2002)
+        .setInteractive({ useHandCursor: true });
+
+      this.mementoText.on('pointerup', () => {
+        this.mementoCollected = true;
+        if (this.mementoNotice && cfg.mementoName) {
+          this.mementoNotice.setText(`Memento: ${cfg.mementoName} collected`);
+        }
+        // Optional: briefly show description in console or another UI
+        console.log(cfg.mementoDescription || '');
+        this.mementoText?.off('pointerup');
+        this.mementoText?.destroy();
+      });
+    }
+
     // Close hint
     this.docCloseText = this.add
       .text(
         width / 2,
-        height / 2 + panelHeight * 0.34,
+        bottomY,
         'Click anywhere to close',
         {
           fontSize: '20px',
@@ -376,6 +503,8 @@ export class CampScene extends Phaser.Scene {
     this.docText?.destroy();
     this.docCloseText?.off('pointerup');
     this.docCloseText?.destroy();
+    this.mementoText?.off('pointerup');
+    this.mementoText?.destroy();
   }
 
   // -------------------------------------------------------------------------
