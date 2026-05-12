@@ -1,4 +1,3 @@
-// src/scenes/ExitScene.ts
 import * as Phaser from 'phaser';
 
 export class ExitScene extends Phaser.Scene {
@@ -8,33 +7,34 @@ export class ExitScene extends Phaser.Scene {
 
   preload() {
     this.load.setBaseURL(import.meta.env.BASE_URL)
-    // Arguments: (key, path)
-    this.load.image('backgroundExit', 'assets/background/quit_scene_bg.png');
+    this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js');
   }
 
   create() {
     const { width, height } = this.scale;
+    this.cameras.main.fadeIn(400, 0, 0, 0);
+    this.addText(width, height); // 👈 Pass dimensions
+  }
 
+  private addText(width: number, height: number) {
+    const EXIT_TEXT = "I have heard their groans and sighs, and seen their tears, and I would give every drop of blood in my veins to free them.";
 
-    this.add.image(0, 0, 'backgroundExit')
-      .setOrigin(0, 0)
-      .setDisplaySize(width, height);
-    
-    bg.setDisplaySize(this.sys.game.config.width, this.sys.game.config.height)
-
-    // Fade in from black
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
-
-    // Wait a bit, then fade out and go to menu
-    this.time.delayedCall(1000 * 60 * 60, () => {
-      this.cameras.main.fadeOut(1000, 0, 0, 0);
-
-      this.cameras.main.once(
-        Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
-        () => {
-          this.scene.start('MenuScene');
-        }
-      );
-    });
+    const FONT_FAMILY = 'Cardo'
+    WebFont.load({
+      google: {
+        families: [FONT_FAMILY]
+      },
+      active: () => {
+        this.add.text(width / 2, height / 2, EXIT_TEXT + '\n\n' + '- Harriet Tubman', {
+          fontSize: '28px',
+          color: '#ffffff',
+          backgroundColor: '#000000',
+          fontFamily: FONT_FAMILY,
+          padding: { x: 20, y: 20 },
+          wordWrap: { width: width * 0.6 },
+          align: 'left',
+        }).setOrigin(0.5, 0.5);
+      }
+    })
   }
 }
